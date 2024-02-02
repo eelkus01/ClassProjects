@@ -1,0 +1,185 @@
+/**********************************************************
+*
+* Project 1: Metro Simulator
+* CS 15
+* README
+* Author: Eleanor Elkus eelkus01
+* Date Created: 2/10/23
+*
+*********************************************************/
+
+Compile/run:
+------------
+     - Compile using
+            make MetroSim
+     - run executable with
+            ./MetroSim stationsFile outputFile [commandsFile]
+
+
+Program Purpose:
+----------------
+     MetroSim is an interactive train simulation that works with both files and
+     the command line. It simulates adding passengers to stations, moving a
+     train along its stations, and picking up and dropping off passengers as it
+     goes.
+
+
+Acknowledgements:
+----------------- 
+     Received some help and implementation recommendations from a TA during my
+     design check off.
+     Used https://en.cppreference.com/w/cpp/container/vector for reference on
+     how to use std::vector and its built in functions.
+     Used is_prime.cpp from the course website for a template on reading in
+     files and checking they opened correctly.
+     Used the course website's article on File I/O to further help understand
+     reading in and writing to files.
+     Used https://www.geeksforgeeks.org/vector-in-cpp-stl/ for further info on
+     vectors as a data structure.
+
+
+Files:
+------
+main.cpp:
+     Handle simple driver functions in order to open, read in, and close files
+     necessary to run the MetroSim game.
+
+MetroSim.cpp:
+     Implementation of the MetroSim class.
+
+MetroSim.h:
+     Interface and definition of the MetroSim class.
+
+stations.txt:
+     An example file containing a list of stations.
+
+testStations.txt:
+     A file containing a smaller list of stations and without the ending blank
+     line.
+
+test_commands.txt:
+     Sample list of commands that you could give to the simulator. (Tests all
+     commands).
+
+addPassCommands.txt:
+     List of commands to only test the passenger adding command.
+
+mmCommands.txt:
+     List of only metro move commands.
+
+allButEnd.txt:
+     List of commands to test the add passenger and metro move commands.
+
+emptyCommand.txt:
+     Empty command file to test the edge case of running program on no command.
+
+the_MetroSim:
+     Reference implementation for students to see how the program should run.
+
+Passenger.h:
+     Interface and definition of the Passenger class.
+
+Passenger.cpp:
+     Implementation of the Passenger class.
+
+PassengerQueue.h
+     Interface and definition of the PassengerQueue class.
+
+PassengerQueue.cpp
+     Implementation of the PassengerQueue class.
+
+unit_tests.h
+     Unit testing file to allow for testing of individual functions.
+
+Makefile:
+     File to build the program.
+
+README:
+     This file.
+
+
+Data Structures:
+----------------
+     The main data structures I used on this project were queues and vectors.
+     A queue is a linear data structure that is open at both ends and
+     operations are performed in first in first out order. Elements are added
+     to the back and taken from the front. Their main advantage is that they're
+     essentially a restricted version of a list so it's much harder to run into
+     issues related with implementation. However, this means that they're main
+     disadvantage is that the middle of the queue can not be changed (elements
+     cannot be added or removed anywhere except the front and back of the
+     queue). I used vectors to implement my PassengerQueue, stations, and the
+     train. I used the built in C++ vector and its associated functions.
+     Vectors are dynamic arrays that have the ability to resize itself
+     automatically when an element is inserted or deleted. This is one of their
+     main benefits, along with the ability to traverse elements using iterators
+     since vector elements are placed in contiguous storage. One of their main
+     disadvantages is that insertions can be expensive since all elements after
+     the insertion must be shifted. Also, allocating memory dynamically is
+     slower than simply using the stack.
+
+
+Testing:
+--------
+     For Phase 1, I used the unit_tests.h file to test for each individual
+     function created within the Passenger and PassengerQueue classes. I used
+     a similar process for each test. To test the print function of Passenger,
+     I made a Passenger with some given values as the ID, Arrival, and
+     Departure, then called print and asserted that it was correct. For all
+     PassengerQueue functions, I created a PassengerQueue, enqueued some
+     passengers, dequeued some if needed, and then asserted that the correct
+     result happened after running the function being tested. The edge cases I
+     handled for PassengerQueue were making sure print didn't print anything
+     when called on an empty queue and making sure front() worked as expected
+     if a passenger was dequeued. These classes were also tested by association
+     through their implementation in the overall MetroSim program.
+
+     For Phase 2, I tested everything using diff testing because all of my
+     functions worked together as a whole and were very difficult (if even
+     possible) to test individually. In order to test many different edge cases
+     I made various different stations and commands files. For example, I made
+     a stations file (testStations.txt) that is a much smaller size than the
+     provided stations file and also doesn't end in a new line. This checked
+     that I was both reading in a making the stations correctly and that I
+     stopped reading in from the file at the correct spot. The different
+     command files I made for testing purposes are as follows. emptyCommand
+     is as it sounds, a completely empty .txt file. This was to test that my
+     program still printed the starting screen, but that it immediately ended
+     the game and provided the goodbye message correctly. addPassCommand tested
+     simply the command to add passengers to different stations. Because this
+     was my first command-related function to implement, I wanted to test its
+     functionality before moving on to the other commands. mmCommands is just
+     "m m" 178 times and it doesn't end in a new line. Its purpose was to make
+     sure my m m was looping correctly through all the stations and that it was
+     reading in the commands as expected (i.e. still reading the last line even
+     though the file didn't end in a new line). My allButEnd file tested both
+     the adding passenger and metro move commands, but not the m f command. It
+     also includes adding passengers whose arrival > departure, whose arrival
+     = departure, and whose arrival < departure (some of the edge cases I
+     wanted to test). Finally, I used the provided test_commands to test all of
+     the commands as a whole. The diff testing process was the same every time:
+     redirect the output from running my MetroSim on the wanted commands to a
+     stdout file, doing the same for the demo Metrosim, and then running diff
+     on the stdout files and checking that no output was created. I also tested
+     running my program on invalid stations and command files using bash and
+     the diff testing template set up in lab 3. This would test both my error
+     messages as well as my creation of an output file. Lastly, I diff tested
+     the output files created after running a long list of varying commands in
+     order to make sure my messages were outputting correctly when a passenger
+     departed from the train.
+
+
+Part that you found most difficult:
+-----------------------------------
+     What I had the hardest time with was simply making a plan of how to set up
+     the program. I think I was a bit overwhelmed with how much freedom we had
+     and I was a bit lost on where to even start. Once I had implemented phase
+     one, I just wasn't very sure where to go from there. I had to do a lot of
+     playing around with different classes, structs within classes, etc before
+     I had actually wrapped my brain around everything. Honestly, the majority
+     of my time spent on this homework was simply concerning planning and
+     readjusting my past plan.
+
+
+Total Hours Spent: 30 hours
+------------------

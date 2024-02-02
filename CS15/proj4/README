@@ -1,0 +1,380 @@
+/**************************************************************
+*
+* Project 4: gerp
+* CS 15
+* README
+* Authors: Eleanor Elkus (eelkus01) and Talia Tepper (tteppe01)
+* Date Created: 4/14/23
+*
+**************************************************************/
+
+Compile/run:
+------------
+    Compile using: make or make gerp
+    Run executable using: ./gerp inputDirectory outputFile
+
+
+Program Purpose:
+----------------
+    gerp is a program that can interactively search file directories for
+    instances of a given word in both a sensitive and insensitive manner.
+
+
+Acknowledgements:
+----------------- 
+When figuring out hashing, we looked at our notes from the lecture and the
+lecture slides, as well as talking to the TAs in office hours about it during
+and after our design check off, as well as figuring out more minute details of
+it from reference websites such as geeksforgeeks.com and cplusplus.com. 
+
+We looked at the std::vector class and its functions when using vectors from
+a reference website (cplusplus.com).
+
+When we had errors or issues we could not resolve, we went to office hours to
+get help from TAs, asked questions on piazza, or read already asked questions
+on piazza. 
+
+If we had an error we couldn't figure out, we would search it on cplusplus
+or geeksforgeeks, or we would copy and paste an error into google to figure
+out what it meant.
+
+We looked at some of our past homeworks and projects to remember how to 
+properly use vectors, structs, and arrays, how to query loop, and how to
+process command line arguments, and anything else we needed a refresher on
+that we had already learned. We also looked at the lab we did that involved
+hashing when we struggled with hashing.
+
+Arya and Tom were very helpful TA's when we were dealing with debugging our
+rehash function.
+
+
+Files:
+------
+Makefile:
+    File to build the program.
+
+README:
+    This file.
+
+gerp.cpp:
+    Implementation of the gerp class.
+
+gerp.h:
+    Interface and definition of the gerp class.
+
+main.cpp:
+    Process the command line arguments, make the gerp object, and run it.
+
+DirNode.h:
+    Not written by us. Interface and definition of the DirNode class.
+
+unit_tests.h:
+    Unit testing file to allow for testing of individual functions.
+
+testDir:
+    A small directory made for testing purposes. It contains a subdirectory and
+    four test files, all either empty or containing small lines of text.
+
+a.txt:
+    A file from testDir that contains a few lines of text for testing purposes.
+
+testDir2:
+    A directory containing a single text file of about 1400 lines of text; for
+    testing purposes.
+
+b.txt:
+    A file from testDir2 that contains 1400+ lines of text for testing
+    purposes.
+
+testDir3:
+    A directory containing a handful of subdirectories, each containing
+    subdirectories of their own and various text files to test for edge cases.
+
+cmds1.txt:
+    A file containing a few sample commands to test for general functionality
+    and edge cases.
+
+dem.stderr:
+    A file containing output sent to cerr by the reference implementation
+    during testing.
+
+my.stderr:
+    A file containing output sent to cerr by our program during testing.
+
+demoOutput.txt:
+    A file used to send output of the reference implementation to during
+    testing.
+
+demoOutput2.txt:
+    A second file used to send output of the reference implementation to
+    during testing (mainly for testing of the @f command).
+
+myOutput.txt:
+    A file used to send output of our implementation to during testing.
+
+myOutput2.txt:
+    A second file used to send output of out implementation to during testing
+    (mainly for testing of the @f command).
+
+output.out:
+    A file used to hold redirected cout output from our implementation during
+    testing.
+
+output.gt:
+    A file used to hold redirected cout output from the reference
+    implementation during testing.
+
+filecmd1.txt:
+    A file containing sample commands using the @f command; for testing.
+
+FSTree.h:
+    Not written by us. Interface and definition of the FSTree class.
+
+FSTreeTraversal.cpp:
+    Implementation and declaraction of the functions needed for phase one to
+    traverse directories and print their file paths.
+
+hash_test.cpp:
+    Not written by us, used to see how hashing can be tested.
+
+hashExample.cpp:
+    Not written by us, used to see how hashing can be done.
+
+proj4-test-dirs:
+    Not written by us. A directory containing all Gutenberg files and other
+    testing directories.
+
+stringProccessing.h:
+    Declaration of the stripNonAlpha function to strip leading and trailing non
+    alphanumeric characters from a string.
+
+stringProccessing.cpp:
+    Definition of the stripNonAlpha function described above.
+
+the_gerp:
+    Not written by us, example program to see how it should be run.
+
+
+
+
+Architectural Overview:
+-----------------------
+In phase one, we made a function that traversed the FSTree of DirNodes, with
+the function passing in a pointer to a DirNode as a paramater. We later used
+this function to parse through the directories and access the files, so we
+copied the function into gerp.cpp and gerp.h, altering it to no longer print
+the file paths to cout but rather to save them and add as a member of a struct.
+
+In phase two, we set up main.cpp and our runGerp function so that a directory
+and an output file were passed in, and we used the traversal function from
+above on that directory and passed in information to the output file. 
+We built the hash table using the information in the files before the query
+loop so that we could access all the organized informaiton from the files
+that we would need when querying. We built the hash table as an array,
+each bucket holding a vector of vectors of structs. It is a 2D vector in
+order to handle collisions with chaining. That way, in a bucket (or array
+spot), there could be multiple vectors within the main vector that would
+hold different kinds of words, and each word that was the same would go into
+the same vector. The key that we used to hash was each word in the file,
+and the value in each vector was a struct which we made in gerp.h. The
+struct held all the info we would need for later: the file path (which
+we later held in a vector in order to save space, so the same string would
+not need to be held over and over again), line number, file line text (which
+we also held in a vector in order to save space so the same string would not
+need to be held over and over), and of course the word. We parsed through
+each file, putting each word into a struct with all the necessary info and
+hashing each struct into its vector in the appropriate bucket using the key
+word. We handled collisions using chaining, as previously mentioned, and 
+we also handled rehashing to dynamically resize the array in case there was a
+smaller capacity than needed and we needed to increase the capacity to make
+room for more buckets if the load factor was going to go over 0.75. Once the
+hash table was made, we used the informaiton in the hash table to answer each
+query, looking at each struct within each vector within each vector within each
+bucket to find the coinciding word and printing the information from the struct
+to the output file as directed. In order to handle duplicates, we put the found
+info structs in a vector and parsed through that vector to remove duplicates 
+(like if the same word occurred twice on one line), and then printed the 
+correct info to the output file. All of this was in the gerp class, an object
+of which was made in the main.cpp and the starting function called in the main,
+passing in the needed information given by the user input.
+
+
+Data Structures and Algorithms:
+-------------------------------
+We used a built-in hash function or hashing algorithm to handle hashing
+into our hash table which was an array of vectors of vectors of structs.
+We used the hashing algorithm to map data from the files because we didn't know
+how much data we would need to map and we knew we needed to organize the data
+and output it to a file in an efficient manner (searching for a word needed to
+be constant time). Hashing required a number of algorithms within it, such as
+handling collisions, rehashing, the load factor, and the hash function itself.
+We learned about the compression function as well as how to handle collisions,
+rehashing using various methods, and the load factor in lecture. We used the
+hash function so that each struct would be hashed to a unique bucket using a
+key (which in our case was the word currently being read in). We used hashing
+because the average time complexity for insertion, finding, and removal is
+O(1), and because it made sense to organize our data in a way that kept all
+instances of single word (and any of its possible capitalization versions)
+within the same index for easy access later on. We chose to use a vector of
+vectors because of the easy and straight forward implementation of vectors.
+We didn't require much more functionality outside of inserting an element
+and accessing elements via iteration, all of which are simple and efficient
+when using vectors. We put the information we would need from the files into
+a struct in order to keep multiple pieves of different types of data in one
+place. The main downside to hashing was handling collision, which for us,
+appeared when multiple different words were hashed to the same array index.
+We handles collisions by chaining, hence the use of a vector of vectors.
+The biggest downside to vectors that we ran into was that there was not a
+straightforward way to remove the first element in any given vector. We had
+to use iterators and the erase() function as opposed to simply calling a
+pop_front() function like in queues.
+
+Additionally, a tree was used to organize the directories and subdirectories
+when indexing. The code for doing so was not written by us, as it was provided
+in the starter code. The files containing the code that set up this directory
+tree are DirNode.h and FSTree.h. The benefit of using a tree data structure in
+this way was that it allows for efficient navigation of all the files within
+the directories and it organizes the elements in a hierarchy, meaning all
+directories/subdirectories were parent nodes (if they contained other files),
+and all text files were leaves. It is also very simple to traverse a tree and
+save the path taken from the root to any leaf (which was essentially what we
+did in order to get each file's file path). The one downside to a tree is that
+they can require a lot of memory, especially if (in this case) there is a large
+and complicated network of subdirectories and files within a certain directory
+(like large Gutenberg).
+
+In our program, hashing required a number of algorithms within it, such as
+handling collisions, rehashing, the load factor, and the hash function itself.
+We learned about the compression function as well as how to handle collisions,
+rehashing using various methods, and the load factor in lecture.
+
+We have discussed and used various algorithms such as sorting, searching, and
+string concatination or comparison. We had to do some string manipulation and
+comparsions in this program, and we did have to sort data and search through
+it, although we did not use a classic searching or sorting algorithm (such as
+the ones we have recently learned about in class). 
+
+In our last project, we used the Huffman coding algorithm which is used for
+lossless data compression and in order to reduce the number of bits to store
+data, which made sense for that project as the goal was to compress and
+decompress text and find the number of bits needed for that. This algorithm
+required constructing a Huffman tree, whereas the hashing algorithm on the
+other hand, is used to index data, and is a fast operation that can be used for
+efficient and fast lookups of data. There are connections between these
+algorithms as they are both used for data compression and both proccess data
+using different properties of the data.
+
+
+Testing:
+--------
+For Phase One of this program, we testing mainly using the unit_testing
+framework, especially for the stripNonAlpha function. We made various tests
+within unit_test.h that all used the same process: make a string and assert
+that the string post-stripping was as expected (no leading or trailing non
+alphanumeric characters). We tested for various edge cases, including a string
+of entirely nonalphanumeric characters (in which case the function should
+return the empty string), and the case where there were nonalphanumeric
+characters within the middle of the string (these should not have been
+removed). To test the functionality of FSTreeTraversal.cpp, we created various
+smaller test directories (testDir, testDir2, and testDir3), each containing
+varying levels of complexity and depth ranging from just test files to many
+subdirectories within subdirectories, etc. These directories were also used
+later on to test the funcitonality of the entire program. When testing
+FSTreeTraversal.cpp, we ran our program on any of the test directories, and
+then checked the outputted file paths against what we knew should be the
+correct file path (we computed by hand).
+
+For Phase Two, testing became a bit more complicated, especially in regards to
+hashing. So, we decided to create three functions: printHash, printText, and
+printPath. printHash printed all filled buckets of our hash table, with curly
+braces signifying the number of outer vectors within each bucket, and <> 
+signifying each inner vector within the outer vector. printText simply printed
+the vector containing each line in the directory being indexed, and printPath
+printed the vector containing all file paths of the directory. The later two
+were moreso helpful when just checking that these vectors were being formed
+correctly, and then later on when debugging possible edge cases (duplicate 
+words on the same line, etc). The printHash function though, became possibly
+the most useful function of our entire testing process. We called each of the
+three functions within our runGerp function (after traversing the directory but
+before entering the query loop). Below is an example of what it looks like to
+run printHash, printText, and printPath on a directory (testDir):
+
+    HASH TABLE:
+    ---------------------------------------
+    24 | {<and, 0, 4><and, 0, 5>}
+    26 | {<Testing, 0, 4>}
+    42 | {<Eleanor, 0, 0><Eleanor, 0, 1>}
+    53 | {<this, 0, 5>}
+    57 | {<Talia, 0, 2><talia, 0, 3>}
+    58 | {<other, 0, 6>}
+    84 | {<Stuff, 0, 4><stuff, 0, 4>}
+    85 | {<more, 0, 4>}
+    91 | {<some, 0, 4><some, 0, 4><some, 0, 6>}
+    (Note: the first number within each <> is the filePath index and the second
+    number is the lineText index (can check both below))
+
+    FILE PATH VECTOR:
+    ---------------------------------------
+    0 | testDir/a.txt
+    1 | testDir/b.txt
+    2 | testDir/sub/c.txt
+    3 | testDir/sub/d.txt
+
+    LINE TEXT VECTOR:
+    ---------------------------------------
+    0 | Eleanor
+    1 | Eleanor
+    2 | Talia
+    3 | talia 
+    4 | Testing some Stuff and some more stuff
+    5 | and this
+    6 | some other
+
+These functions allowed us to see all necessary information, printed in an easy
+to read format, clearly showing whether or not we hashed information correctly.
+If done correctly, the hash table should show all instances of a word
+(regardless of capitalization) within the same outer vector (curly braces), and
+any other words, if hashed to the same index, should appear within their own
+set of curly braces.
+
+This is what the table looks like after the capacity is lowered from 100 to 3,
+ensuring there will be collisions and rehashing (just for presentation purposes
+of showing how these functions helped us test functionality of rehashing and
+chaining):
+
+    HASH TABLE:
+    ---------------------------------------
+    1 | {<Talia, 0, 2><talia, 0, 3>}
+    5 | {<more, 0, 4>}
+    6 | {<Testing, 0, 4>}
+    8 | {<Stuff, 0, 4><stuff, 0, 4>}{<and, 0, 4><and, 0, 5>}
+    10 | {<Eleanor, 0, 0><Eleanor, 0, 1>}
+    15 | {<some, 0, 4><some, 0, 4><some, 0, 6>}
+    21 | {<this, 0, 5>}
+    22 | {<other, 0, 6>}
+
+As you can see at index 8, stuff and and were hashed to the same index.
+However, because we used chaining to deal with such cases, and appears in its
+own set of curly braces. This is the correct format, so we now know that our
+program handles chaining and rehashing correctly (we obviously also tested on
+much more complicated and long data, like testDir2, to ensure our program
+worked on cases beyond the simple one above).
+
+Once we had worked out all bugs in our hashing and indexing, we were able to
+test our program using diff testing against the reference implementation. We
+created various text files to hold different series of commands (cmds1.txt,
+filecmd1.txt), ran both programs on varying directories, reading in from the
+file as opposed to cin, and redirecting all cout output to either output.out or
+output.gt, then diff testing all output files to ensure there were no
+differences between our program and the reference. We did this same process on
+the various testing files provided in the starter code (keep-query, long-query,
+etc). Before diff testing, we also sorted both the demo and our own output
+files to account for non-specified ordering. We diff tested immensely and on
+many different directories, including all Gutenbergs, testing for as many edge
+cases as we could think of. When necessary (i.e. when diff showed errors), we
+would print out the hash table and other tables shown above, searching for
+where the error originated.
+
+
+Total Hours Spent: 36 hours
+------------------

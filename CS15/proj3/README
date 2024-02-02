@@ -1,0 +1,241 @@
+/**********************************************************
+*
+* Project 3: zap
+* CS 15
+* README
+* Author: Eleanor Elkus eelkus01
+* Date Created: 3/28/23
+*
+*********************************************************/
+
+Compile/run:
+------------
+    Compile using: make zap or just make
+    Run executable using: ./zap [zap | unzap] inputFile outputFile
+
+
+Program Purpose:
+----------------
+    zap is a program that can compress and decompress text files using the
+    Huffman coding algorthm.
+
+
+Acknowledgements:
+----------------- 
+    Used https://en.cppreference.com/w/cpp/container/map for reference on how
+    to use std::map and its functions and https://www.geeksforgeeks.orgmap-
+    associative-containers-the-c-standard-template-library-stl/ for further
+    reference on std::map's applications. I used https://cplusplus.com/
+    reference/istream/istream/get/ to help understand the get() function and
+    how to use it. I used https://cplusplus.com/reference/utility/pair/pair/ to
+    understand using std::pair (initializing and accessing).
+
+    I received a lot of very helpful tips from Austen and Sean in office hours
+    that helped me a lot in my understanding of the program.
+
+
+Files:
+------
+Makefile:
+    File to build the program.
+
+README:
+    This file.
+
+the_zap:
+    Reference implementation to see how the program should run.
+
+stdout:
+    A folder containing all testing files (countTest, countTest2, countTest3,
+    codeTest, codeTest2) that diff will be run against when unit testing.
+
+countTest:
+    A file containing the correct output for running count_freqs on the string
+    "simple"; for diff testing purposes.
+
+countTest2:
+    A file containing the correct output for running count_freqs on the string
+    "A more tricky input but not so hard"; for diff testing purposes.
+
+countTest3:
+    A file containing the correct output for running count_freqs on a long and
+    more complicated string; for diff testing purposes.
+
+codeTest:
+    A file containing the correct character codes of a simple three node tree
+    with an 'a' as the left child and a 'b' as the right child; for diff
+    testing purposes.
+
+codeTest2:
+    A file containing the correct character codes of the Figure 1 tree
+    described in the spec; for diff testing purposes.
+
+fig1tree.txt:
+    A file containing the characters of the correct frequency that make up the
+    Figure 1 tree described in the spec; for testing purposes.
+
+phaseOne.cpp:
+    Implementation of the three phaseOne functions and their helpers.
+
+phaseOne.h:
+    Declarations of the three phaseOne functions and their helpers.
+
+unit_tests.h:
+    Unit testing file to allow for testing of individual functions.
+
+ZapUtil.h:
+    A provided file containing utility functions to help when testing and
+    debugging.
+
+HuffmanCoder.h:
+    Interface and definition of the HuffmanCoder class.
+
+HuffmanCoder.cpp:
+    Implementation of the HuffmanCoder class.
+
+main.cpp:
+    Process the command line arguments, make the HuffmanCoder, and run it.
+
+HuffmanTreeNode.h:
+    Interface and definition of the HuffmanTreeNode class; provided in starter
+    code.
+
+BinaryIO.h:
+    Interface and definition of the BinaryIO class; provided in starter code.
+
+demoOutput.txt:
+    A file used to send output to when testing the reference implementation.
+
+myOutput.txt:
+    A file used to send output to when testing my implementation.
+
+my.stderr:
+    A file containing output sent to cerr during testing.
+
+my.stdout:
+    A file containing output sent to cout during testing.
+
+demo.stderr:
+    A file containing output sent to cerr by the reference implementation
+    during testing.
+
+demo.stdout:
+    A file containing output sent to cout by the reference implementation
+    during testing.
+
+
+Data Structures and Algorithms:
+-------------------------------
+    The two main data structures I used in this program were maps and priority
+    queues. I used maps to represent the frequency of all characters in a given
+    text as well as to represent the character codes for each character in a
+    Huffman Tree. Maps are containers holding (key, value) pairs of unique keys
+    that are sorted by (in this case of characters) ASCII value. Their main
+    benefit for this program was that I could easily iterate over the map,
+    add new keys/values to the map, and check whether a key already existed
+    within the map. They also allowed me to create a more space efficient
+    method of representing character frequencies and codes than simply making
+    an array of size 256 (all possible characters) because I was able to check
+    whether a key had already been added and if so, I simply updated it's value
+    and if not, I added it to the map with the necessary value. Therefore, only
+    the necessary keys were added to the map, thus saving a lof of space in
+    memory. The main disadvantage of a map is that each value in a (key, value)
+    pair can only hold one element (i.e. it can't hold multiple values unless
+    they are made into a list). This didn't affect me in this project because
+    I only wanted each character to hold a single frequency or code anyway. I
+    used a min-heap priority queue to store HuffmanTreeNodes that would later
+    be used to build a Huffman Tree. A min-heap priority queue is essentially a
+    sorted queue whose order is determined by (in this case) the character
+    frequencies. This means that characters with lower frequencies are stored
+    at the top of the queue and those with higher frequencies are stored at the
+    bottom. The main advantage of this was that I could easily build a Huffman
+    Tree from the nodes stored in the priority queue because lower frequency
+    nodes should be added to the tree first and higher frequency nodes last.
+    The main disadvantage of a min-heap priority queue though is that pushing
+    and removing elements isn't very time efficient (O(log n) vs O(1)).
+
+    An interesting algorithm I worked with in this program was recycling heap
+    allocated memory. The only instances where I allocated new memory on the
+    heap was when building and deserializing a Huffman Tree. So, I knew I
+    needed to have a function that should, when given the root of a tree,
+    delete all the nodes used to compose the tree. I thought this should be a
+    fairly similar process to how I recursively deleted nodes in a linked list
+    because I needed to delete the children first and then the parents last 
+    (with the root being the final node deleted). So, I made a private helper
+    function called deleteTree that took a HuffmanTreeNode as an argument and
+    would recursively delete nodes in the tree. If the node was ever the
+    nullptr, I would return. This would ensure that the function return when a
+    leaf node was deleted so that then the parent could be deleted. If the node
+    wasn't the nullptr, I called deleteTree on it's left child, then it's right
+    child, and only then did I delete the node itself. This was essentially a
+    postorder traversal of the tree but instead of printing the node values, I
+    deleted the nodes from the bottom up.
+
+
+Testing:
+--------
+    For phase 1, I used the unit testing framework in order to test my three
+    functions and their helpers. For count_freqs, I made strings of varying
+    size and character complexity, made a stringstream from the string, and
+    then passed that stringstream into the count_freqs function. Because all
+    output is printed to cout, I then made a stdout folder containing files
+    with the same name as the tests within unit_tests.h (countTest, countTest2,
+    and countTest3 described above). These files contain the correct output
+    that count_freqs should print. When unit_test is run, these files are diff
+    tested against the output printed in the individual tests to ensure that
+    count_freqs is running correctly. To test serialize_tree, I used the
+    functions laid out in ZapUtil.h to make a new Huffman Tree. I started by
+    testing serialize_tree against a simple tree make of 1 parent node with 2
+    child nodes. I passed this tree into the function, and asserted that the
+    string it returned was the correct serialization. Additionally, I used the
+    makeFigure1Tree function to make the tree described in the spec and then
+    asserted that serialize_tree, when run with the figure 1 tree, returned the
+    correct serialization (given in the spec). Finally, to test
+    deserialize_tree, I made a string of an example of a serialized tree (first
+    for a simple tree and then for the more complicated figure 1 tree). I then
+    saved the tree created from running deserialize_tree on the string and
+    compared it to a manually created tree using the treeEquals function from
+    ZapUtil to assert that both trees were equal.
+
+    For phase 2, I was able to test some the first few function using the same
+    unit testing framework described above (building the Huffman Tree and 
+    generating the character codes). I had to make these tests private
+    after running because they test private functions within the HuffmanCoder
+    class. For the rest of the functions I created, because they relied on
+    output from many previous functions and worked as a whole with the program,
+    unit testing became much more complicated. So instead, I relied on either
+    diff testing or checking my program's output against output I computed by
+    hand (both methods I will describe in more detail below).
+
+    For the functions involved in encoding a text (i.e. when zap is run), after
+    I had thoroughly tested both my function to build the Huffman Tree and my
+    function to to generate character codes, I was able to use these as a
+    testing reference for the remaining functions. For example, after writing
+    my function to encode the given text using the Huffman Tree, I printed the
+    binary string created as well as both the Huffman Tree and the character
+    codes to cout. I then ran my program on some simple input files (either
+    given or created by me) and ensured that the encoding matched the string
+    made from combining the previously checked character codes with the
+    characters in the text. Once I had finished all functions for the encoding
+    process, I ran my program on a wide range of files (small and large), and 
+    then used bash to redirect the statement printed to cout containing the
+    size of the encoding and diff tested this against the reference
+    implementation (used this same process to test my error statements). I sent
+    these to my.stdout, my.stderr, demo.stdout, and demo.stderr respectively.
+
+    For the decoding functions, I had previously tested most of them in phase 1
+    (or they were provided functions like readFile that didn't require 
+    testing). So after I had written my function to generate the decoded
+    message and saved this message to the given output file, I was able to use
+    a similar diff testing process as described above. After running both zap
+    and unzap on my program and their respective files, I diff tested the
+    output file from unzap against the input file from zap and ensured that
+    they contained the exact same information and format. To double check that
+    my program was correct, I also ran zap on the reference implementation, ran
+    unzap on my program, and diff tested my output file against the reference's
+    input file. I also did the reverse of this process to test my zap function
+    against the reference's unzap.
+
+
+Total Hours Spent: 8 hours
+------------------

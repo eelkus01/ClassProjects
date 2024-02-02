@@ -1,0 +1,193 @@
+/**********************************************************
+*
+* Project 2: CalcYouLater
+* CS 15
+* README
+* Author: Eleanor Elkus eelkus01
+* Date Created: 2/26/23
+*
+*********************************************************/
+
+Compile/run:
+------------
+    Compile using: make CalcYouLater
+    Run executable using: ./CalcYouLater
+
+
+Program Purpose:
+----------------
+    CalcYouLater is an interactive Reverse Polish Notation calculator that can
+    read from the command line and a file (if inserted in the command line). It
+    can handle all basic calculator operations as well as more advanced
+    comparison and scenario operations.
+
+
+Acknowledgements:
+----------------- 
+    Used https://cplusplus.com/reference/list/list/ for help understanding C++
+    lists and their functions.
+    Used https://stackoverflow.com/questions/16229729/printing-out-contents-of
+    -a-list-from-the-c-list-library for help using a list iterator to create a
+    print function for testing purposes within my DatumStack class.
+    Used https://cplusplus.com/reference/sstream/istringstream/istringstream/ 
+    for reference on making and using stringstreams.
+    I also found many Piazza posts to be very helpful on this project.
+
+
+Files:
+------
+DatumStack.cpp:
+    Implementation of the DatumStack class.
+
+DatumStack.h:
+    Interface and definition of the DatumStack class
+
+main.cpp:
+    Make the calculator and run it.
+
+RPNCalc.cpp:
+    Implementation of the RPNCalc class.
+
+RPNCalc.h:
+    Interface and definition of the RPNCalc class.
+
+parser.cpp:
+    Implementation of the parseRString function.
+
+parser.h:
+    Declaration of the parseRString function.
+
+unit_tests.h:
+    Unit testing file to allow for testing of individual functions.
+
+add.cyl:
+    A list of commands to test pushing numbers to the stack, adding them, and
+    printing the result.
+
+comp_ops.cyl:
+    A list of commands to test the comparison of both integers and bools as
+    well as various of the other "easy" commands to alter the stack.
+
+easy_ops.cyl:
+    A more detailed test of all the easy commands (arithmetic, comparison,
+    altering stack order, pushing new elements on stack, removing from stack,
+    etc).
+
+exec.cyl:
+    A list of commands to test the exec command (executing rstrings that have
+    been pushed on the stack).
+
+file_test.cyl:
+    Calls different files to check the file command.
+
+if_test.cyl:
+    Tests many different scenarios for the if command.
+
+many_ops.cyl:
+    A list of many different arithmetic commands being performed on integers.
+
+rstring.cyl:
+    A file to test pushing rstring on the stack and printing them.
+
+Makefile:
+    File to build the program.
+
+README:
+    This file.
+
+
+Data Structures:
+----------------
+    The main data structure I used on this project was a stack. Within my
+    DatumStack class, I used a C++ list to create a list of type Datum that I
+    then referred to as stack. The rest of DatumStack essentially created my
+    own stack that mirrored the functionality of a C++ stack. In general, a
+    stack is a type of container adapter that utilizes the Last In First Out
+    sequence of working. This means that there is a single active end on the
+    stack. Elements can be added or removed from this one end but from nowhere
+    else in the stack. They are essentially a restricted version of a list,
+    which means that they have the advantage of having less room for human and
+    implementation errors since they have very limited functionality. However,
+    their main disadvantage also comes from their restrictions. The most
+    recently added element MUST be removed in order to access the element added
+    before it, i.e. a user cannot access anything in the middle or front of the
+    stack. Another situation where stacks would be useful is, like discussed in
+    class, checking that an expression containing parentheses is balanced. This
+    was partially used in this program, but a stack would be especially helpful
+    in checking expressions involving parentheses of varying types (normal,
+    braces, brackets, etc) and a lot of nesting. When an opening parenthesis is
+    read in, it is added to the stack. When a closing parenthesis is read in,
+    check that it matches the top of the stack, pop them both off, and
+    continue. If you're left with an empty stack at the end, the expression was
+    balanced. Another scenario that can use stacks is simply reversing a string
+    or other type of expression. The characters/elements could be pushed on the
+    stack and then popped off to create a new reversed version.
+
+    An interesting algorithm I worked with on this project was handling the if
+    command. Since three elements are required to be on the stack in order for
+    if to run, I started by checking the size. If the size was less than 3, I
+    cleared the stack and threw an error. Then, I had to check that the top
+    element was an rstring, the next element was also an rstring, and the next
+    (i.e. third element in stack) was a bool. If any of these weren't true, I
+    printed an error and made sure all three elements were still popped off
+    the stack. If the bool evaluated to true, I pushed the first rstring back
+    on the stack and ran my exec function. If it evaluated to true, I did the
+    same but with the second rstring. This ensured that the correct rstring was
+    evaluated and that I would make my function as modular as possible. I also
+    used various helper functions in order to increase modularity. For example,
+    I made a function that popped and returned the top element of the stack so
+    that I wouldn't have to do the same thing three times in order to get the
+    top three elements.
+
+
+Testing:
+--------
+    For Phase 1, I used the unit_tests.h file to test each individual function
+    created within the DatumStack class as well as the parseRString function. I
+    used a similar process for each test. I created a private helper function
+    to print the entire DatumStack (which was represented as a c++ list). I
+    used this print function to check that after a certain other function was
+    run on the DatumStack (push, pop, clear, etc), the stack printed as
+    expected. I would additionally check that the stack's size was as it should
+    be and/or the stack was empty if applicable. I also created separate tests
+    to check that the functions correctly threw an error when called on an
+    empty stack. This just applied to the top() and pop() functions. I tested
+    the parseRString function by creating a stringstream of a certain string (I
+    varied the lengths and components to test edge cases), passing that stream
+    into the function, and asserting that what it returned was correct. I also
+    tested to make sure that parseRString correctly threw an error when the
+    rstring being read in was unbalanced.
+
+    For Phase 2, I used diff to test all of my functions since the RPNCalc
+    class worked together as a whole for many of the commands. To do this, I
+    created many different .cyl files that contained various commands. I then
+    converted these to .cylc files using the provided conversion program. Then,
+    I performed the usual diff testing to compare my program's output to the
+    demo program's output. Once I had reached the point where I handled errors,
+    I created tests that gave purposefully wrong commands and used bash to make
+    sure my program printed the same statements to cerr as the demo did. The
+    files I made for diff testing are the following. add.cyl simply pushed
+    numbers onto the stack (both positive and negative numbers), added them,
+    ran print, and checked that the correct sum was printed. comp_ops.cyl
+    pushed many numbers and comparison operators (<, >, etc) on the stack and
+    printed the result; this also tested the dup, not, and clear commands.
+    easy_ops.cyl just further tested all of the easy RPNCalc operations like
+    pushing numbers and bools, dup, swap, not, clear, print, arithmetic, and
+    comparisons. exec.cyl inserted rstrings and then ran exec on them; this
+    tested for both simple and nested rstrings. file_test.cyl called various
+    files after pushing integers on the stack (if necessary for the function);
+    it also tested for calling file on a nonexistent file to make sure the
+    error statement was as expected. if_test.cyl set up many different
+    scenarios and then called the if command; this tested for both simple and
+    complex if scenarios as well as wrong scenarios (to test error messages).
+    many_ops.cyl simply performed many arithmetic operations on integers of
+    varying size and value and printed the result after each operation.
+    Finally, rstring.cyl pushed many rstrings of different sizes and values of
+    nesting on the stack and just printed them. I ran all of these files on
+    diff and, if necessary, used bash to check their error messages. I ran into
+    many simple and easy to fix bugs related to error messages that I was able
+    to catch and fix through this process.
+
+
+Total Hours Spent: 17 hours
+------------------
